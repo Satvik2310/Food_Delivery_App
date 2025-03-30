@@ -1,17 +1,34 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+const express = require("express");
+const dotEnv = require('dotenv');
+const mongoose = require('mongoose');
+const vendorRoutes = require('./routes/vendorRoutes');
+const bodyParser = require('body-parser');
+const firmRoutes = require('./routes/firmRoutes');
+const productRoutes = require('./routes/productRoutes');
+const cors = require('cors');
+const path = require('path')
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+const app = express()
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+const PORT = process.env.PORT || 4000;
+
+dotEnv.config();
+app.use(cors())
+
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("MongoDB connected successfully!"))
+    .catch((error) => console.log(error))
+
+app.use(bodyParser.json());
+app.use('/vendor', vendorRoutes);
+app.use('/firm', firmRoutes)
+app.use('/product', productRoutes);
+app.use('/uploads', express.static('uploads'));
+
+app.listen(PORT, () => {
+    console.log(`server started and running at ${PORT}`);
+});
+
+app.use('/', (req, res) => {
+    res.send("<h1> Welcome to SUBY");
+})
